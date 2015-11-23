@@ -29,7 +29,7 @@ import org.apache.log4j.Logger;
  */
 public class ListenerController {
     static final String xmlFileName = "output.xml";
-    private static final String template = "Hello, %s!";
+    private static final String template = "MASHAPE (json) RESPONSE: %s";
     private final AtomicLong counter = new AtomicLong();
     static Logger log = Logger.getLogger(ListenerController.class.getName());
 
