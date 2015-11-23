@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="org.scribe:scribe:1.2.1" type="repository">
+    <properties maven-id="org.scribe:scribe:1.2.1" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/scribe/scribe/1.2.1/scribe-1.2.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/commons-codec/commons-codec/1.4/commons-codec-1.4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
