@@ -7,12 +7,13 @@ var updateContentDivWithData = function(data){
 $(document).ready(function(){
     $('#execute_response').click(function(){
        var searchTerm = $('#twitter_terms').val();
+       console.log(searchTerm);
         $.ajax({
             url: '/tweet_listener/greeting',
             type: 'POST',
             headers: {
-                'Accept':'application/JSON',
-                'Content-Type': 'application/JSON'
+                'Accept':'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
             dataType: 'json',
             data: {'search_Term': searchTerm },
