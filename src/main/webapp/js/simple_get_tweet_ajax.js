@@ -1,11 +1,14 @@
 var updateContentDivWithData = function(data){
+	$('#loading').hide();
     document.getElementById('content').innerHTML = JSON.stringify(data);
 }
 
 
 
 $(document).ready(function(){
+	$('#loading').hide();
     $('#execute_response').click(function(){
+    	$('#loading').show();
        var searchTerm = $('#twitter_terms').val();
        console.log(searchTerm);
         $.ajax({
@@ -18,7 +21,7 @@ $(document).ready(function(){
             dataType: 'json',
             data: {'search_Term': searchTerm },
             success: function(data){updateContentDivWithData(data);},
-            error: function(){alert('an error occurred during ajax');}
+            error: function(){$('#loading').hide(); alert('an error occurred during ajax');}
         });
     });
 });
