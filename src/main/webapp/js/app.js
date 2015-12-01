@@ -1,13 +1,13 @@
 (function() {
-	var app = angular.module("coffeebirds", []);
+	var app = angular.module("coffeebirds", ["ngtweet"]);
 	
 	var MainController = function($scope, $http) {
 	
 		var searchTerm = "trump";
 		
 		$scope.embedTest = {
-			"html":'\u003Cblockquote class=\"twitter-tweet\"\u003E\u003Cp\u003EWhy I joined Twitter - Andy Piper \u003Ca href=\"https:\/\/twitter.com\/andypiper\"\u003E@andypiper\u003C\/a\u003E, Developer Advocate \u003Ca href=\"https:\/\/t.co\/fQ796U9lq1\"\u003Ehttps:\/\/t.co\/fQ796U9lq1\u003C\/a\u003E\u003C\/p\u003E— TwitterDev (<a href="https://twitter.com/intent/user?screen_name=TwitterDev">@TwitterDev</a>) \u003Ca href=\"https:\/\/twitter.com\/TwitterDev\/statuses\/482281320232415232\"\u003EJune 26, 2014\u003C\/a\u003E\u003C\/blockquote\u003E\n\u003Cscript async src=\"\/\/platform.twitter.com\/widgets.js\" charset=\"utf-8\"\u003E\u003C\/script\u003E'
-		}
+			'tweetid' : '617749885933232128'
+		};
 	
 		var onUserComplete = function(response) {
 			$scope.tog = false;
