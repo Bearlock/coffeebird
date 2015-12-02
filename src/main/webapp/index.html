@@ -1,34 +1,54 @@
 <!DOCTYPE html>
-<html ng-app="coffeebirds">
-<head>
-    <title>Coffeebirds</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.2/angular.min.js"></script>
-    <script src="js/ngtweet.min.js"></script>
-	<script src="js/app.js"></script>
-
-</head>
-
-<body ng-controller="MainController">
-	<div>
-	    <h1>Coffeebirds</h1>
-	    <h2>Get Mashape Info: {{ term }}</h2>
-	    <h2>{{ success }}</h2>
-	    <h2>{{ error }}</h2>
-	    <label for="twitter_terms">Enter term to search here: <input type="text" id="twitter_terms" ng-model="term" required></label>
-	    <button id="execute_response" ng-click="search(term)">Execute Twattering!</button>
-	    <div id="loading" ng-if="tog">
-	    	<img src="hex-loader2.gif">
-	   	</div>
-	    <div id="content" ng-repeat="cluster in clusters">
-		    <pre>{{ cluster }}</pre>
-	    </div>
-	    <div>
-		    <pre>{{ cleanTweets }}</pre>
-	    </div>
-	    <div>
-		   <twitter-widget twitter-widget-id="'617749885933232128'"></twitter-widget>
-	    </div>
-	</div>
-</body>
+<html ng-app="coffeebirds" lang="en">
+	<head>
+		<meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+	    <title>Coffeebirds</title>
+	    
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.2/angular.min.js"></script>
+	    
+	    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	    <script src="bootstrap/js/bootstrap.min.js"></script>
+	    
+	    <script src="js/ngtweet.min.js"></script>
+		<script src="js/app.js"></script>
+		
+		<link rel="icon" href="../image/favicon.ico" type="image/x-icon"/>
+	    <link rel="shortcut icon" href="image/favicon.ico" type="image/x-icon"/>
+	
+	</head>
+	
+	<body ng-controller="MainController">
+		<div class="jumbotron">
+			<div class="container">
+		    	<h1>Coffeebirds</h1>
+				<h2>Get Mashape Info: {{ term }}</h2>
+				<h2>{{ success }}</h2>
+				<h2>{{ error }}</h2>
+			</div>
+		</div>
+		<div class="container">
+			<div class="row">
+		    	<label for="twitter_terms">Enter term to search here: <input type="text" class="form-control" id="twitter_terms" ng-model="term" required></label>
+				<button class="btn btn-lg btn-default" id="execute_response" ng-click="search(term)">
+					Execute Twattering!
+					<span class="glyphicon glyphicon-heart" aria-hidden="true"></span>
+				</button>
+				<div id="loading" ng-if="tog">
+		    		<img src="image/hex-loader2.gif">
+		   		</div>
+		   		<div id="content" ng-repeat="cluster in clusters">
+			    	<pre>{{ cluster }}</pre>
+		    	</div>
+				<div>
+			    	<pre>{{ cleanTweets }}</pre>
+		    	</div>
+				<div>
+					<twitter-widget twitter-widget-id="embedTest.tweetid"></twitter-widget>
+		    	</div>
+			</div>
+		</div>
+	</body>
 </html>
