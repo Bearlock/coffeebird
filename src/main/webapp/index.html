@@ -10,7 +10,7 @@
 	    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.2/angular.min.js"></script>
 	    
 	    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
-	    <link href="bootstrap/css/cover.css" rel="stylesheet">
+
 	    <script src="bootstrap/js/bootstrap.min.js"></script>
 	    
 	    <script src="js/ngtweet.min.js"></script>
@@ -21,7 +21,7 @@
 	
 	</head>
 	
-	<body ng-controller="MainController" style="padding-top: 70px; padding-left: 150px;" >
+	<body ng-controller="MainController" style="padding-top: 70px; margin-left: 10%;" >
 		<nav class="navbar navbar-default navbar-fixed-top">
 	    	<div class="container">
 				<img class="img-responsive navbar-left" src="image/coffeebird.png" height="64" width="64">
@@ -32,24 +32,24 @@
 			<h1>Get Mashape Info: {{ term }}</h1>
 		</div>
 		<div class="row marketing container">
-			<div class="col-lg-6">
-			    <label for="twitter_terms">Enter term to search here: <input type="text" class="form-control" id="twitter_terms" ng-model="term" required></label>
-				<button class="btn btn-lg btn-default" id="execute_response" ng-click="search(term)">
+			<div style="margin-left: 15%; width: auto;">
+			    <label for="twitter_terms">Enter term to search here: <input type="text" class="form-control input-lg" id="twitter_terms" ng-model="term" required></label>
+				<button class="btn btn-lg btn-default" id="execute_response" ng-click="search(term)" style="margin-bottom: 8px;">
 					Execute Twattering!
 					<span class="glyphicon glyphicon-heart" aria-hidden="true"></span>
 				</button>
-				<div id="loading" ng-if="tog">
-			    	<img src="image/hex-loader2.gif">
-			   	</div>
-			   	<div id="content" ng-repeat="cluster in clusters">
-				    <pre>{{ cluster }}</pre>
-			    </div>
-				<div>
-				   	<pre>{{ cleanTweets }}</pre>
-			   	</div>
-				<div>
-					<twitter-widget twitter-widget-id="embedTest.tweetid" style="padding-left: 100px;"></twitter-widget>
-			    </div>
+			</div>
+			<div id="loading" ng-if="tog" style="margin-left: 20%;">
+			    <img src="image/hex-loader2.gif">
+			</div>
+			<div id="content" ng-repeat="cluster in clusters">
+				<pre style="padding-top: 10px;">{{ cluster }}</pre>
+			</div>
+			<div>
+				<pre>{{ cleanTweets }}</pre>
+			</div>
+			<div>
+				<twitter-widget twitter-widget-id="embedTest.tweetid" style="margin-left: 15%;"></twitter-widget>
 			</div>
 		</div>
 	</body>
