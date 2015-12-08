@@ -24,10 +24,6 @@
 			console.log($scope.cleanTweets);
 			$scope.error = "";
 
-			//var updateContentDivWithData = function(data){
-				//$('#loading').hide();
-    			//document.getElementById('content').innerHTML = JSON.stringify(data);
-//}
 		};
 	
 		var onError = function(reason) {

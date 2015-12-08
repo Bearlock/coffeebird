@@ -16,8 +16,8 @@
 	    <script src="js/ngtweet.min.js"></script>
 		<script src="js/app.js"></script>
 		
-		<link rel="icon" href="../image/favicon.ico" type="image/x-icon"/>
-	    <link rel="shortcut icon" href="image/favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="image/coffeebird.png" type="image/x-icon"/>
+	    <link rel="shortcut icon" href="image/coffeebird.png" type="image/x-icon"/>
 	
 	</head>
 	
@@ -25,17 +25,19 @@
 		<nav class="navbar navbar-default navbar-fixed-top">
 	    	<div class="container">
 				<img class="img-responsive navbar-left" src="image/coffeebird.png" height="64" width="64">
+				<a href="presentation.html" class="navbar-right btn btn-success" style="margin-top: 15px; margin-bottom: 15px;">Watch Presentation</a>
 				<span><a class="navbar-brand" href="#">CoffeeBird</a></span>
 	    	</div>
 		</nav>
 		<div class="page-header">
-			<h1>Get Mashape Info: {{ term }}</h1>
+			<h1 style="margin-left: 15%;">Get Live Data:</h1>
+			<h1 style="margin-left: 15%;">{{ term }}</h1>
 		</div>
 		<div class="row marketing container">
 			<div style="margin-left: 15%; width: auto;">
 			    <label for="twitter_terms">Enter term to search here: <input type="text" class="form-control input-lg" id="twitter_terms" ng-model="term" required></label>
-				<button class="btn btn-lg btn-default" id="execute_response" ng-click="search(term)" style="margin-bottom: 8px;">
-					Execute Twattering!
+				<button class="btn btn-lg btn-default" id="execute_response" ng-click="search(term)" style="margin-bottom: 8px; padding-left: 45px; padding-right: 45px;">
+					Execute Search
 					<span class="glyphicon glyphicon-heart" aria-hidden="true"></span>
 				</button>
 			</div>

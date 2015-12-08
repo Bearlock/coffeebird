@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Coffeebird - A Tweet crawler and data clusterer</title>
+
+		<meta name="description" content="An application to gather real time twitter data and their relationships">
+		<meta name="author" content="Erick Diaz, Ryan Huntbach, Ben Berntson">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>Coffeebird</h1>
+					<img src="../coffeebird.png" width="200px" height="200px">
+					<h3>A Tweet crawler and data cluster-er</h3>
+					<p>
+						<small>Created by <a href="#">Ryan Huntbach, Ben Berntson, and Erick Diaz</a></small>
+					</p>
+				</section>
+
+				<section>
+					<h2>What is it?</h2>
+					<p>
+						Coffeebird is a Spring Boot application built for the express purpose of tweet collection, clean-up, and clustering. Coffeebird makes use of two major components: <em>Java</em> as the backend API and <em>Angular.js</em> as the responsive frontend. 
+					</p>
+				</section>
+
+				<!-- Example of nested vertical slides -->
+				<section>
+					<section>
+						<h2>Backend = Backbone</h2>
+						<p>The backbone of Coffeebird is a RESTful Java API</p>
+						<p>Users never directly manipulate the application backend itself, but instead interact with it through GET and POST requests </p>
+						<p>The backend API can be distilled down to six classes</p>
+						<br>
+						<a href="#" class="navigate-down">
+							<img width="200" height="200" data-src="../redjavalogo.png" alt="Java Logo">
+						</a>
+					</section>
+					<section>
+						<h2>Application class</h2>
+						<p>This class starts and runs the application along with an embedded Apache Tomcat webserver</p>
+						<pre><code class="java" data-trim contenteditable>
+package coffeebirds;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Application {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}
+						</code>
+						</pre>
+					</section>
+					<section>
+						<h2>ListenerController class</h2>
+						<p>Nested slides are useful for adding additional detail underneath a high level horizontal slide.</p>
+						<pre><code class="java" data-trim contenteditable>
+package coffeebirds;
+
+import java.io.*;
+import java.util.concurrent.atomic.AtomicLong;
+
+
+import java.io.*;
+import java.sql.SQLException;
+import java.util.*;
+
+
+import org.codehaus.jackson.map.ObjectMapper;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.json.XML;
+import org.json.JSONObject;
+import org.apache.log4j.Logger;
+/**
+ * Created by ben on 11/20/15.
+ */
+@RestController
+@RequestMapping(value ="tweet_listener")
+
+
+/**
+ * @author Ben Berntson
+ */
+public class ListenerController {
+    static final String xmlFileName = "output.xml";
+    private static final String template = "MASHAPE (json) RESPONSE: %s";
+    private final AtomicLong counter = new AtomicLong();
+    static Logger log = Logger.getLogger(ListenerController.class.getName());
+
+    /**
+     * @author Ben Berntson
+     * @param searchTerm
+     * @return
+     */
+    @RequestMapping(value="/greeting")
+    public SimpleJsonPOJO greeting(@RequestParam(value="search_Term", defaultValue="trump") String searchTerm){
+        log.info("Received http request from client, looking to search by: " + searchTerm);
+
+        System.out.println(searchTerm);
+
+        //instantiates an object of type TwitterCrawler and generates a JSON string for nlp's response
+        TwitterCrawler tc = new TwitterCrawler(searchTerm);
+        String result = tc.run();
+
+        //checks to see if the first for characters of Mashape's response is "null" and removes "null" if it is
+        if(result.substring(0,4).equals("null"))
+            result = result.substring(4);
+
+        //converts Mashape result to XML
+        JSONObject jsonObject = new JSONObject(result);
+        String xml = XML.toString(jsonObject);
+
+        //writes out xml
+        try {
+            PrintWriter pw = new PrintWriter(new FileWriter(new File(xmlFileName)));
+            pw.write(xml);
+            pw.close();
+        }
+        catch(IOException e){
+            System.out.println("Error while printing our XML file: " + xmlFileName + ".");
+            e.printStackTrace();
+        }
+
+        //attempts to convert Mashape json to nlpResponseObj using a jackson mapper
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            NLPResponseObj nlpResponseObj = mapper.readValue(result, NLPResponseObj.class);
+        }
+        catch(IOException e){
+            System.out.println("Could not parse NLP/Mashape resonse.");
+            e.printStackTrace();
+        }
+
+        //returns a simple Json object to the client that contains Mashape's response
+        return new SimpleJsonPOJO(counter.incrementAndGet(), String.format(template, result));
+    }
+
+}
+						</code>
+						</pre>
+					</section>
+					<section>
+						<h2>NLPResponseObj Class</h2>
+						<p>This class does a thing</p>
+						<pre><code class="java" data-trim contenteditable>
+package coffeebirds;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+/**
+ * Created by ben on 11/21/15.
+ */
+public class NLPResponseObj {
+    @JsonProperty("results")
+    private LinkedHashMap&lt;String,Object&gt; results;
+
+    public LinkedHashMap&lt;String,Object&gt; getResults(){
+        return results;
+    }
+
+    public void setResults(LinkedHashMap&lt;String,Object&gt; results){
+        this.results = results;
+    }
+
+    @JsonProperty("numOfClusters")
+    private long numOfClusters;
+
+    public long getNumOfCluster(){
+        return numOfClusters;
+    }
+
+    public void setNumOfClusters(long numOfClusters){
+        this.numOfClusters = numOfClusters;
+    }
+
+    @JsonProperty("clusters")
+    private ArrayList&lt;Object&gt; clusters;
+
+    public void setClusters(ArrayList&lt;Object&gt; clusters){
+        this.clusters = clusters;
+    }
+
+    public ArrayList&lt;Object&gt; getClusters(){
+        return clusters;
+    }
+
+    @JsonProperty("clusterScore")
+    private double clusterScore;
+
+    public void setClusterScore(double clusterScore){
+        this.clusterScore = clusterScore;
+    }
+
+    public double getClusterScore(){
+        return clusterScore;
+    }
+
+    public String toString(){
+        return ("" + getClusters() + getClusterScore());
+    }
+
+
+
+
+}
+						</code>
+						</pre>
+					</section>
+					<section>
+						<h2>SimpleJsonPOJO class</h2>
+						<pre><code class="java" data-trim contenteditable>
+package coffeebirds;
+
+public class SimpleJsonPOJO {
+
+    private final long id;
+    private final String content;
+
+    public SimpleJsonPOJO(long id, String content) {
+        this.id = id;
+        this.content = content;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+}
+						</code>
+						</pre>
+					</section>
+					<section data-transition="slide" data-background="#4d7e65" data-background-transition="zoom">
+						<h2>TweetObj Class</h2>
+						<p>This does stuff</p>
+						<pre><code class="java" data-trim contenteditable>
+package coffeebirds;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonProperty;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+
+/**
+ * Used to create, access, and modify twitter API response objects
+ * Maintains the following data for each tweet: text, created_at, name, screen_name
+ * @author Ryan Huntbach, Ben Berntson
+ */
+public class TweetObj {
+
+    @JsonProperty("text")
+    private String text;
+    @JsonProperty("created_at")
+    private String created_at;
+    @JsonProperty("name")
+    private String name;
+    @JsonProperty("scree_name")
+    private String screen_name;
+    @JsonProperty("id_str")
+    private String id_str;
+    @JsonProperty("id")
+    private long id;
+    @JsonProperty("source")
+    private String source;
+
+    public String getId_str(){return id_str;}
+
+    public void setId_str(String id_str){this.id_str = id_str;}
+
+    public long getId(){return id;}
+
+    public void setId(long id){this.id = id;}
+
+    /**
+     * @author Ben Berntson
+     * @return the source of the tweet (e.g. android app, ios app, web browser on pc)
+     */
+    public String getSource(){return source;}
+
+    /**
+     * @author Ben Berntson
+     *
+     * @param source
+     */
+    public void setSource(String source){this.source = source;}
+
+
+    /**Getter for "text" data member
+     * @author Ryan Huntbach
+     * @param
+     * @return text (String)
+     */
+    protected String getText() {
+        return text;
+    }
+
+    /**Setter for "text" data member
+     * @author Ryan Huntbach
+     * @param text (String)
+     * @return void
+     */
+    protected void setText(String text) {
+        this.text = text;
+    }
+
+
+    /**Getter for "created_at" data member
+     * @author Ryan Huntbach
+     * @param
+     * @return created_at (String)
+     */
+    protected String getCreated_at() {
+        return created_at;
+    }
+
+    /**Setter for "created_at" data member
+     * @author Ryan Huntbach
+     * @param created_at (String)
+     * @return void
+     */
+    protected void setCreated_at(String created_at) {
+        this.created_at = created_at;
+    }
+
+    /**Getter for "name" data member
+     * @author Ryan Huntbach
+     * @param
+     * @return name (String)
+     */
+    protected String getName() {
+        return name;
+    }
+
+    /**Setter for "name" data member
+     * @author Ryan Huntbach
+     * @param name (String)
+     * @return void
+     */
+    protected void setName(String name) {
+        this.name = name;
+    }
+
+    /**Getter for "screen_name" data member
+     * @author Ryan Huntbach
+     * @param
+     * @return screen_name (String)
+     */
+    protected String getScreen_name() {
+        return screen_name;
+    }
+
+    /**Setter for "screen_name" data member
+     * @author Ryan Huntbach
+     * @param screen_name
+     * @return void
+     */
+    protected void setScreen_name(String screen_name) {
+        this.screen_name = screen_name;
+    }
+
+}
+						</code>
+						</pre>
+					</section>
+					<section>
+						<h2>TweetCrawler Class</h2>
+						<p>this class does stuff</p>
+						<pre><code class="java" data-trim contenteditable>
+package coffeebirds;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Date;
+import java.util.Scanner;
+
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.scribe.builder.ServiceBuilder;
+import org.scribe.builder.api.TwitterApi;
+import org.scribe.model.OAuthRequest;
+import org.scribe.model.Response;
+import org.scribe.model.Token;
+import org.scribe.model.Verb;
+import org.scribe.oauth.OAuthService;
+
+import org.apache.log4j.Logger;
+
+
+
+/**Gathers a String from the user, and then finds Tweets related to that string, via the
+ * Twitter API.  The class then clusters the Tweets, using the RxNLP API (through mashape).
+ * Finally, the clustered results are output to the screen, to show what people are Tweeting
+ * about the topic entered by the user.
+ * @author Ryan Huntbach
+ * Slightly modified for external use by Ben Berntson
+ * Added logging capability by Ben Berntson
+ *
+ */
+public class TwitterCrawler
+{
+    static Logger log = Logger.getLogger(TwitterCrawler.class.getName());
+
+    private final String promptUserForInputMessage = "Enter a word, or words, you'd like to find Tweets for: ";
+    private String wordsToFind;
+    private int totalTweetsToGather = 100;
+    private String jsonString = null;
+    private String nlpResponseString;
+    private TweetObj[] tweetObjArr = new TweetObj[totalTweetsToGather];
+    private int tweetsCount = 0;
+
+    public TwitterCrawler(String wordsToFind){
+        this.wordsToFind = wordsToFind;
+    }
+
+
+    /**Handles control flow for the application
+     * @author Ryan Huntback
+     * @return void
+     */
+    public String run(){
+        listenForTweets();
+        buildJsonString();
+        getClusters();
+        parseAndOutputClusteringAPIResponse();
+        return nlpResponseString;
+    }
+
+
+    /**Creates a JSON object that holds the data for "created", "text", "name" and "screen_name"
+     * @author Ryan Huntback
+     * @return void
+     * @throws IOException
+     * @throws JsonMappingException
+     * @throws JsonParseException
+     */
+    private boolean parseTweet(String tweetData) throws JsonParseException, JsonMappingException, IOException{
+        log.info("Cleaning raw tweet: " + tweetData + new Date().toString());
+        if (tweetData.isEmpty()){ return false; }//Sometimes Twitter API sends blank Tweets
+
+        try{
+
+            //Convert JSON into an object
+            ObjectMapper mapper = new ObjectMapper();
+            tweetObjArr[tweetsCount] = mapper.readValue(tweetData, TweetObj.class);
+
+            //Remove unwanted text
+            String textStr = tweetObjArr[tweetsCount].getText();
+            textStr = textStr.replaceAll("\\bhttp\\S+", "");
+            textStr = textStr.replaceAll("@\\S+", "");
+            textStr = textStr.replaceAll("\\#\\S+", "");
+            textStr = textStr.replaceAll("RT ", "");
+            textStr = textStr.replaceAll("\"", "");
+            textStr = textStr.replaceAll("\\n", "");
+            textStr = textStr.replaceAll("[^a-zA-Z0-9\\s]", "");
+
+            log.info("got here with text str"+ textStr);
+
+            //Is the text still useful now that the unwanted text was removed?
+            if (textStr.length() > 0){
+                tweetObjArr[tweetsCount].setText(textStr);
+                return true;
+            }else{
+                tweetObjArr[tweetsCount] = null;
+                return false;
+            }
+
+        }catch(JsonParseException e){//frogger add multi-catch statement
+            log.info("Encountered exception: ", e);
+            System.out.println("Encountered JsonParseException in parseTweet()\n");
+            System.out.println(tweetData);
+            e.printStackTrace();
+            return false;
+        }catch(JsonMappingException e){
+            log.info("Encountered exception: ", e);
+            System.out.println("Encountered JsonMappingException in parseTweet()\n");
+            System.out.println(tweetData);
+            e.printStackTrace();
+            return false;
+        }catch(IOException e){
+            log.info("Encountered exception: ", e);
+            System.out.println("Encountered IOException in parseTweet()\n");
+            System.out.println(tweetData);
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**Builds a JSON string from an array of Strings
+     * @author Ryan Huntbach
+     * @return void
+     */
+    private void buildJsonString(){
+
+        StringBuilder myJsonStringBuilder = new StringBuilder("{\"type\":\"pre-sentenced\",\"text\":[");
+
+        for (int tweetNum = 0; tweetNum &lt; totalTweetsToGather; tweetNum++){
+            myJsonStringBuilder.append(String.format("{\"sentence\":\"%s\"},", tweetObjArr[tweetNum].getText()));
+        }
+
+        myJsonStringBuilder.delete(myJsonStringBuilder.length() - 1, myJsonStringBuilder.length());//remove the last comma
+        myJsonStringBuilder.append("]}");
+        jsonString = myJsonStringBuilder.toString();
+    }
+
+    /**Calls the RxNLP API, captures the response, and returns the response as a string
+     * @author Ryan Huntbach
+     * @return void
+     */
+    private void getClusters(){
+
+        final String NLP_URI = "https://rxnlp-core.p.mashape.com/generateClusters";
+
+        //Call RxNLP API
+        try{
+
+            //Create and send request to RxNLP API
+            OAuthRequest nlp_request = new OAuthRequest(Verb.POST, NLP_URI);
+            nlp_request.addHeader("X-Mashape-Authorization", "Zf4RxRjAw7mshPxtFeX2i2WafJDcp1mv13cjsnTW2QUPmOBaFJ");//read file and assign keys to strings
+            nlp_request.addHeader("Content-Type", "application/json");
+            nlp_request.addHeader("Accept", "application/json");
+            nlp_request.addPayload(jsonString);
+            Response nlp_response = nlp_request.send();
+
+            //capture nlp_response and convert to string
+            String line;
+            BufferedReader reader = new BufferedReader(new InputStreamReader(nlp_response.getStream()));
+            while ((line = reader.readLine()) != null){
+                nlpResponseString += line;
+            }
+
+        }catch (IOException e) {
+            log.info("Encountered exception: ", e);
+            log.info("Stack trace: ", e);
+            System.out.println("Encountered a problem while reading from the RxNLP API.  Program must close.");
+            System.out.println("JSON String: " + jsonString);
+            e.printStackTrace();
+        }
+    }
+
+
+    /**Listens to live Twitter feed, via the Twitter API, to find Tweets related to "wordsToFind" (TwitterCrawler::private static string).
+     * As each Tweet comes in, this function calls the parseTweet method to clean the Tweet.
+     * If parseTweet returns a valid tweet (contains valid text), then tweet is added to "tweetsArr" (TwitterCrawler::private static String[]).
+     * @author Ryan Huntbach
+     * @return void
+     *
+     * Logger added by Ben
+     *
+     */
+    private void listenForTweets()
+    {
+        log.info("Listening to live Twitter feed.  This will take some time...");
+
+        try{
+
+            final String TWITTER_STREAM_URI = "https://stream.twitter.com/1.1/statuses/filter.json";
+
+            //open link to Twitter API
+            OAuthService twitter_API_service = new ServiceBuilder()
+                    .provider(TwitterApi.class)
+                    .apiKey("rFyY96RRHALFkhAaulYYZIeCD")
+                    .apiSecret("vqTWzhUD4S1E1ZTnC1kd1H2hveYxV4E7FjH4Ev2s898rpxqGDP")
+                    .build();
+            Token accessToken = new Token("3916948993-Je2ynSs0449yBHxNhrAzty13NMWz4ifEXUqRDc2", "xQtald1ueBje3NgrVEz0fuC82MOSPc0XxU3DIce3lj5or");
+            OAuthRequest twitter_API_request = new OAuthRequest(Verb.POST, TWITTER_STREAM_URI);
+            twitter_API_request.addHeader("version", "HTTP/1.1");
+            twitter_API_request.addHeader("host", "stream.twitter.com");
+            twitter_API_request.setConnectionKeepAlive(true);
+            twitter_API_request.addHeader("user-agent", "Twitter Stream Reader");
+            twitter_API_request.addBodyParameter("track", wordsToFind);
+            twitter_API_service.signRequest(accessToken, twitter_API_request);
+            Response twitter_response = twitter_API_request.send();
+
+            //Parse tweets and add them to tweetArr
+            String rawTweetData;
+            BufferedReader reader = new BufferedReader(new InputStreamReader(twitter_response.getStream()));
+            while ((rawTweetData = reader.readLine()) != null && tweetsCount &lt; totalTweetsToGather){
+                if(parseTweet(rawTweetData)) {
+                    ++tweetsCount;
+                }
+            }
+
+        }catch (IOException e){
+            log.info("Encountered exception while getting data from the twitter API: ", e);
+            System.out.println("Encountered a problem while reading from the Twitter API.  Program must close.");
+            e.printStackTrace();
+        }
+    }
+
+    /**Parses Tweet clustering API response, and outputs results to the screen
+     * @author Ryan Huntbach
+     * @params void
+     * @returns void
+     */
+    private void parseAndOutputClusteringAPIResponse(){
+        log.info("SUCCESSFULLY RECEIVED RESPONSE FROM MASHAPE: " + nlpResponseString + "on" + new Date().toString());
+    }
+}					
+						</code>
+						</pre>
+					</section>	
+				</section>
+
+				<section>
+					<h2>Essential pieces</h2>
+					<p>
+						Some of the the essential external portions to this application were: 
+					</p>
+					<ul>
+						<li>Jackson Mapper</li>
+						<li>RxNLP API</li>
+						<li>Spring Boot</li>
+					</ul>
+				</section>
+				<section>
+					<section>
+						<h2>Form Should Follow Function</h2>
+						<p>
+							Our Java API is <em>super</em> cool. We thought our frontend should follow suit. 
+						</p>
+						<p>
+							We used Angular.js and Twitter Bootstrap in order to quickly create a pleasant user experience. 
+						</p>
+						<img src="../angularjsicon.png" width="200" height="200"><img src="../twitter_bootstraplogo.png">
+					</section>
+					<section>
+						<h2>Two-way Data Bindings Are Nifty</h2>
+						<p>Angular.js provided us with a simple way to send, receive, and display the resulting data from HTTP requests to the backend API.</p>
+						<pre><code class="javascript" data-trim contenteditable>
+$scope.search = function(searchTerm) {
+	$scope.tog = true;
+	var req = {
+		url: '/tweet_listener/greeting',
+	    method: 'POST',
+	    headers: {
+	    	'Accept':'application/json',
+			'Content-Type': 'application/x-www-form-urlencoded'
+		},
+	    dataType: 'json',
+	    data: "search_Term="+ searchTerm
+	};
+	$http(req).then(function(response){onUserComplete(response);}, function(){onError;});
+};
+						</code>
+						</pre>
+					</section>
+					<section>
+						<h2>Clean and Responsive</h2>
+						<p>Bootstrap took the frontend from looking like a website before the .com crash and brought it to the current decade.</p>
+						<p>By using Angular.js and Bootstrap together, we have created a mobile-first interface that scales for phones, tablets, and desktops.</p>
+						<img src="../responsive-design.png" width="300" height="300">
+					</section>
+				</section>
+				
+
+				<section>
+					<h2>Coffeebird!</h2>
+					<p>All of these great technologies and pieces combine to produce a pretty cool thing we've named "Coffeebird"</p>
+					<img src="../redjavalogo.png" width="150" height="150"><img src="../twittericon.png" width="150" height="150"><img src="../angularjsicon.png" width="150" height="150">
+					<h3>=</h3>
+					<img src="../coffeebird.png" width="150" height="150">
+				</section>
+				<section>
+					<h2>The End</h2>
+					<p>Checkout all the cool technologies we used here!</p>
+					<p><a href="http://wiki.fasterxml.com/JacksonHome">Jackson Mapper!</a></p>
+					<p><a href="http://projects.spring.io/spring-boot/">Spring Boot!</a></p>
+					<p><a href="http://www.rxnlp.com/">RxNLP!</a></p>
+					<p><a href="http://oauth.net/">OAuth!</a></p>
+					<p><a href="http://arusahni.github.io/ngtweet/">ngTweet!</a></p>
+					<p><a href="http://getbootstrap.com">Bootstrap!</a></p>
+					<p><a href="http://angularjs.org">Angular.js!</a></p>
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
