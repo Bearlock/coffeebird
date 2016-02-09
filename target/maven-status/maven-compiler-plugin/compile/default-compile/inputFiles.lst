@@ -1,5 +1,6 @@
-/home/ben/Code/java/twitterGatherer/src/main/java/coffeebirds/TwitterCrawler.java
-/home/ben/Code/java/twitterGatherer/src/main/java/coffeebirds/Tweets.java
-/home/ben/Code/java/twitterGatherer/src/main/java/coffeebirds/TweetObj.java
-/home/ben/Code/java/twitterGatherer/src/main/java/coffeebirds/TweetsController.java
-/home/ben/Code/java/twitterGatherer/src/main/java/coffeebirds/Application.java
+/Users/erickdiaz/projects/workspace/twitterGatherer/src/main/java/coffeebirds/ListenerController.java
+/Users/erickdiaz/projects/workspace/twitterGatherer/src/main/java/coffeebirds/NLPResponseObj.java
+/Users/erickdiaz/projects/workspace/twitterGatherer/src/main/java/coffeebirds/TwitterCrawler.java
+/Users/erickdiaz/projects/workspace/twitterGatherer/src/main/java/coffeebirds/SimpleJsonPOJO.java
+/Users/erickdiaz/projects/workspace/twitterGatherer/src/main/java/coffeebirds/Application.java
+/Users/erickdiaz/projects/workspace/twitterGatherer/src/main/java/coffeebirds/TweetObj.java

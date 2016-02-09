@@ -36,7 +36,7 @@ public class TwitterCrawler
 
     private final String promptUserForInputMessage = "Enter a word, or words, you'd like to find Tweets for: ";
     private String wordsToFind;
-    private int totalTweetsToGather = 10;
+    private int totalTweetsToGather = 100;
     private String jsonString = null;
     private String nlpResponseString;
     private TweetObj[] tweetObjArr = new TweetObj[totalTweetsToGather];
