@@ -149,7 +149,7 @@ public class TwitterCrawler
 
             //Create and send request to RxNLP API
             OAuthRequest nlp_request = new OAuthRequest(Verb.POST, NLP_URI);
-            nlp_request.addHeader("X-Mashape-Authorization", "Zf4RxRjAw7mshPxtFeX2i2WafJDcp1mv13cjsnTW2QUPmOBaFJ");//read file and assign keys to strings
+            nlp_request.addHeader("X-Mashape-Authorization", "somekeyhere");//read file and assign keys to strings
             nlp_request.addHeader("Content-Type", "application/json");
             nlp_request.addHeader("Accept", "application/json");
             nlp_request.addPayload(jsonString);
@@ -192,10 +192,10 @@ public class TwitterCrawler
             //open link to Twitter API
             OAuthService twitter_API_service = new ServiceBuilder()
                     .provider(TwitterApi.class)
-                    .apiKey("rFyY96RRHALFkhAaulYYZIeCD")
-                    .apiSecret("vqTWzhUD4S1E1ZTnC1kd1H2hveYxV4E7FjH4Ev2s898rpxqGDP")
+                    .apiKey("somekey")
+                    .apiSecret("somesecret")
                     .build();
-            Token accessToken = new Token("3916948993-Je2ynSs0449yBHxNhrAzty13NMWz4ifEXUqRDc2", "xQtald1ueBje3NgrVEz0fuC82MOSPc0XxU3DIce3lj5or");
+            Token accessToken = new Token("somesecret", "somekey");
             OAuthRequest twitter_API_request = new OAuthRequest(Verb.POST, TWITTER_STREAM_URI);
             twitter_API_request.addHeader("version", "HTTP/1.1");
             twitter_API_request.addHeader("host", "stream.twitter.com");
